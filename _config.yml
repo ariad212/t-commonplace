@@ -1,0 +1,10 @@
+title: The Commonplace
+description: A place for work, words, and everything in between.
+url: ""
+baseurl: "/commonplace" # For username.github.io/repository, set to "/repository".
+markdown: kramdown
+permalink: /journal/:title/
+plugins:
+  - jekyll-feed
+exclude:
+  - README.md
