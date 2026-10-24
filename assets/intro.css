@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — intro v3: physical coin motion, closed loops, one evolving surface. */
+/* THE COMMONPLACE — intro v5: continuous loops, playful arc, sharper physical impacts. */
 :root { --intro-paper:#f5f2eb; --intro-ink:#333930; --intro-clay:#ba6049; }
 .intro { display:none; position:fixed; z-index:3000; inset:0; background:var(--intro-paper); color:var(--intro-ink); overflow:hidden; flex-direction:column; isolation:isolate; transition:opacity .7s ease,visibility .7s; }
 .intro.is-ready { display:flex; }
@@ -33,3 +33,19 @@ body.intro-active { overflow:hidden; }
 @keyframes intro-blink-v3 { 0%{clip-path:inset(50% 0 50% 0)} 55%,100%{clip-path:inset(0 0 0 0)} }
 @media(max-width:700px){.intro-enter{bottom:25px;font-size:9px;letter-spacing:.1em}.intro-skip{top:22px;right:24px}.intro-knots{width:145%;left:-23%;}.intro-orbit{--coin-size:clamp(174px,49vw,260px)}}
 @media(prefers-reduced-motion:reduce){.intro,.intro *{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
+
+/* A hand-lettered challenge above the coin. It is static until the visitor plays. */
+.intro-play-arc {
+  position:absolute; z-index:2; pointer-events:none; overflow:visible;
+  width:calc(100% + 150px); height:auto; left:-75px; top:-150px;
+  fill:var(--intro-ink); opacity:.9;
+  transition:opacity .35s ease,translate .35s ease;
+}
+.intro-play-arc text { font-family:'DM Sans',sans-serif; font-size:24px; font-weight:700; letter-spacing:3.2px; }
+.intro.is-playing .intro-play-arc { opacity:0; translate:0 -12px; }
+/* A hard landing produces a compact, crisp contact shadow. */
+.intro-shadow { filter:blur(13px); transform-origin:center center; }
+@media(max-width:700px){
+  .intro-play-arc { width:calc(100% + 88px); left:-44px; top:-100px; }
+  .intro-play-arc text { font-size:25px; letter-spacing:1.3px; }
+}
