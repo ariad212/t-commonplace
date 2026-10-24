@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — Intro v5. All animation is local: no libraries or subscriptions.
+/* THE COMMONPLACE — Intro v6 — restored v4 coin and iris. All animation is local: no libraries or subscriptions.
    One canvas is BOTH the coin face and the final iris; there is no eye overlay. */
 (() => {
   'use strict';
@@ -13,7 +13,7 @@
   const skip = document.getElementById('intro-skip');
   if (!ctx || !object || !coin || !shadow || !enter || !skip) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sessionKey = 'commonplace-intro-seen-v5';
+  const sessionKey = 'commonplace-intro-seen-v6';
   let running = false, finished = false, raf = 0;
   const C = 320, R = 307;
   const clamp = (v, a=0, b=1) => Math.min(b,Math.max(a,v));
@@ -105,84 +105,46 @@
   try{if(sessionStorage.getItem(sessionKey)==='yes'){finish();return;}}catch(e){}
   intro.classList.add('is-ready');
   document.body.classList.add('intro-active');
-  // The airborne path is ballistic rather than eased into its landing.
-  // The final vertical velocity is deliberately high: no more soft hovering.
-  const FLIP=4050, LAND=840, ROLL=1180, SETTLE=760, MORPH=2050, ZOOM=1120, BLINK=700;
-  const at={land:FLIP,roll:FLIP+LAND,settle:FLIP+LAND+ROLL,
-    morph:FLIP+LAND+ROLL+SETTLE,zoom:FLIP+LAND+ROLL+SETTLE+MORPH,
+  const FLIP=4200, LAND=420, ROLL=1120, SETTLE=660, MORPH=2050, ZOOM=1120, BLINK=700;
+  const at={ land:FLIP, roll:FLIP+LAND, settle:FLIP+LAND+ROLL,
+    morph:FLIP+LAND+ROLL+SETTLE, zoom:FLIP+LAND+ROLL+SETTLE+MORPH,
     blink:FLIP+LAND+ROLL+SETTLE+MORPH+ZOOM};
-  const GROUND=58;
-  const xImpact=-90, xRollEnd=54, xRest=18;
   let startTime=0;
-  function drawMotion(x,y,pitch,tilt,yaw=0,scale=1,squash=0){
-    const radius=Math.max(85,object.clientWidth/2);
-    object.style.transform=`translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) rotateZ(${tilt.toFixed(2)}deg) rotateX(${pitch.toFixed(2)}deg) rotateY(${yaw.toFixed(2)}deg) scale(${scale.toFixed(4)}) scaleY(${(1-squash).toFixed(4)})`;
-    // A fixed ground plane + a moving, height-sensitive shadow sells contact.
-    // The darkest/sharpest shadow appears at impact, not while in flight.
-    const elevation=Math.max(0,GROUND-y);
-    const airborne=clamp(elevation/165);
-    const contact=1-airborne;
-    shadow.style.transform=`translateX(${x.toFixed(2)}px) scale(${(mix(1.0,.58,airborne)).toFixed(3)},${(mix(1,.85,airborne)).toFixed(3)})`;
-    shadow.style.opacity=(scale>2?0:mix(.70,.13,airborne)).toFixed(3);
-    shadow.style.filter=`blur(${mix(4,22,airborne).toFixed(2)}px)`;
-    // The small flattening at the exact moment of impact is very brief.
-    coin.style.filter=squash>0?`brightness(${(1+.09*squash).toFixed(3)})`:'none';
-  }
+  const drawMotion=(x,y,pitch,roll,yaw=0,scale=1)=>{
+    object.style.transform=`translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) rotateZ(${roll.toFixed(2)}deg) rotateX(${pitch.toFixed(2)}deg) rotateY(${yaw.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
+    shadow.style.transform=`translateX(${(x*.87).toFixed(2)}px) scale(${(scale>2?1:mix(.7,1.15,clamp(y/45))).toFixed(3)})`;
+    shadow.style.opacity=(scale>2?0:clamp(mix(.22,.65,clamp(y/45)))).toFixed(3);
+  };
   const lerpT=(time,start,len)=>clamp((time-start)/len);
-  const hop=(u,height)=>-height*4*u*(1-u);
-  const radius=()=>Math.max(85,object.clientWidth/2);
   function frame(now){
     if(finished)return;
     const t=now-startTime;
     if(t < at.land){
-      const u=lerpT(t,0,FLIP);
-      // Three forward face-on rotations; rotation never eases to a stop before impact.
-      // y = -611u + 669u²; the accelerating descent reaches the surface hard.
-      drawMotion(xImpact*u, -611*u+669*u*u,
-        72+1008*u, -17*u, 2*Math.sin(u*Math.PI*6),1);
+      // Forward, not sideways: ~three full X-axis revolutions.
+      const u=lerpT(t,0,FLIP),p=cubic(u);
+      drawMotion(-84*smooth(u),40*smooth(u)-139*Math.sin(Math.PI*u),72+1008*p,-13*smooth(u),2*Math.sin(u*Math.PI*5));
     } else if(t < at.roll){
-      const ms=t-at.land;
-      if(ms<85){
-        // Contact impulse: squash and a few pixels of compression.
-        const v=ms/85;
-        const compress=Math.sin(Math.PI*v);
-        drawMotion(xImpact,GROUND+7*compress,1080,-17+3*compress,0,1,.070*compress);
-      } else if(ms<545){
-        // First rebound: rises quickly, then accelerates back into the surface.
-        const v=(ms-85)/460;
-        drawMotion(xImpact+10*v,GROUND+hop(v,40),1080+12*v,-17+10*v,6*Math.sin(Math.PI*v));
-      } else if(ms<805){
-        // Second, much smaller rebound; diminishing restitution.
-        const v=(ms-545)/260;
-        drawMotion(xImpact+10+7*v,GROUND+hop(v,11),1092+3*v,-7+5*v,2.5*Math.sin(Math.PI*v));
-      } else {
-        const v=(ms-805)/(LAND-805);
-        drawMotion(xImpact+17,GROUND,1095,-2,0,1,.014*(1-v));
-      }
+      // Impact on the rim: compression, a little bounce, then contact.
+      const u=lerpT(t,at.land,LAND);
+      const bounce=Math.sin(Math.PI*u);
+      drawMotion(-84,40+12*Math.sin(u*Math.PI*2)-16*bounce,1080,-13,3*Math.sin(u*Math.PI*2),1-.027*bounce);
     } else if(t < at.settle){
-      const u=lerpT(t,at.roll,ROLL);
-      // The spin is coupled to the travelled distance (wheel-like rolling),
-      // and both lose speed together through rolling resistance.
-      const travelled=(xRollEnd-(xImpact+17))*(1-Math.pow(1-u,2.35));
-      const x=xImpact+17+travelled;
-      const angle=(-2)+(travelled/radius())*(180/Math.PI);
-      const rattle=(1-u)*Math.sin(u*Math.PI*14);
-      drawMotion(x,GROUND-2.8*Math.abs(rattle),1095+5*rattle,
-        angle+3.2*rattle,3*rattle);
+      // The coin actually travels across the imaginary ground while rotating on its rim.
+      const u=lerpT(t,at.roll,ROLL),p=out(u);
+      const wobble=(1-u)*Math.sin(u*Math.PI*6);
+      drawMotion(mix(-84,44,p),40-3*Math.sin(Math.PI*u),1080+7*wobble,mix(-13,48,p),8*wobble);
     } else if(t < at.morph){
-      const u=lerpT(t,at.settle,SETTLE), dec=Math.pow(1-u,1.7);
-      const wobble=Math.sin(u*Math.PI*7.5)*dec;
-      const p=out(u),endAngle=((xRollEnd-(xImpact+17))/radius())*(180/Math.PI)-2;
-      drawMotion(mix(xRollEnd,xRest,p),GROUND-4*Math.abs(wobble),
-        mix(1095,1080,p)+5*wobble,mix(endAngle,0,p)+6*wobble,3*wobble);
+      // A precarious diminishing wobble ends with a circle facing the visitor.
+      const u=lerpT(t,at.settle,SETTLE),p=smooth(u),osc=Math.sin(u*Math.PI*4)*(1-p);
+      drawMotion(mix(44,19,p),40-2*osc,1080+5*osc,mix(48,0,p)+4*osc,4*osc);
     } else if(t < at.zoom){
       const u=lerpT(t,at.morph,MORPH),p=smooth(u);
       intro.classList.add('is-transforming');
-      drawMotion(mix(xRest,0,p),mix(GROUND,0,p),1080,0);
-      paint(u); // Morph the very same physical surface, never overlay another eye.
+      drawMotion(mix(19,0,p),mix(40,0,p),1080,0);
+      paint(u); // single surface: there cannot be a second iris over a metal coin
     } else if(t < at.blink){
       const u=lerpT(t,at.zoom,ZOOM);
-      if(!intro.classList.contains('is-zooming')) paint(1);
+      if(!intro.classList.contains('is-zooming')) paint(1); // remove every final trace of metal
       intro.classList.add('is-zooming');
       drawMotion(0,0,1080,0,0,mix(1,24,u*u*u));
     } else if(t < at.blink+BLINK){
