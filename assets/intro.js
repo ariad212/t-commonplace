@@ -13,7 +13,7 @@
   const skip = document.getElementById('intro-skip');
   if (!ctx || !object || !coin || !shadow || !enter || !skip) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sessionKey = 'commonplace-intro-seen-v3';
+  const sessionKey = 'commonplace-intro-seen-v4';
   let running = false, finished = false, raf = 0;
   const C = 320, R = 307;
   const clamp = (v, a=0, b=1) => Math.min(b,Math.max(a,v));
