@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Caslon+Display&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
+  {% if page.url == "/" %}<link rel="stylesheet" href="{{ '/assets/intro.css' | relative_url }}">{% endif %}
 </head>
 <body>
   <header class="site-header wrap">
@@ -22,5 +23,6 @@
   </header>
   <main>{{ content }}</main>
   <footer class="site-footer wrap"><span>© {{ 'now' | date: '%Y' }} The Commonplace</span><span>Made slowly, with intention. ✳</span></footer>
+  {% if page.url == "/" %}<script src="{{ '/assets/intro.js' | relative_url }}" defer></script>{% endif %}
 </body>
 </html>
