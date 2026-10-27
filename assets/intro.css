@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — intro v6 (v4 coin motion restored): physical coin motion, closed loops, one evolving surface. */
+/* THE COMMONPLACE — v7: closed loops, engraved coin, iris, and a pupil-window into the homepage. */
 :root { --intro-paper:#f5f2eb; --intro-ink:#333930; --intro-clay:#ba6049; }
 .intro { display:none; position:fixed; z-index:3000; inset:0; background:var(--intro-paper); color:var(--intro-ink); overflow:hidden; flex-direction:column; isolation:isolate; transition:opacity .7s ease,visibility .7s; }
 .intro.is-ready { display:flex; }
@@ -28,13 +28,10 @@ body.intro-active { overflow:hidden; }
 .intro.is-transforming .intro-knots { opacity:.12; }
 .intro.is-zooming .intro-knots { opacity:0; }
 .intro.is-zooming .intro-skip { opacity:0; pointer-events:none; }
-.intro-blink { position:absolute;z-index:6;inset:0;background:#171715;clip-path:inset(50% 0 50% 0);pointer-events:none; }
-.intro.is-blinking .intro-blink { animation:intro-blink-v3 .7s ease-in-out both; }
-@keyframes intro-blink-v3 { 0%{clip-path:inset(50% 0 50% 0)} 55%,100%{clip-path:inset(0 0 0 0)} }
 @media(max-width:700px){.intro-enter{bottom:25px;font-size:9px;letter-spacing:.1em}.intro-skip{top:22px;right:24px}.intro-knots{width:145%;left:-23%;}.intro-orbit{--coin-size:clamp(174px,49vw,260px)}}
 @media(prefers-reduced-motion:reduce){.intro,.intro *{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
 
-/* v6 — curated, non-overlapping loop placements and higher, larger lettering. */
+/* Curated loop positions and curved lettering retained from the previous layout. */
 .intro-knots { opacity:.89; width:100%; height:100%; left:0; top:0; }
 .intro-knots--desktop { display:block; }
 .intro-knots--mobile { display:none; }
@@ -55,4 +52,19 @@ body.intro-active { overflow:hidden; }
   .intro-knots--mobile { display:block; width:100%; height:100%; left:0; }
   .intro-play-arc { width:min(430px,96vw); top:clamp(58px,8vh,96px); }
   .intro-play-arc text { font-size:38px; letter-spacing:1.4px; }
+}
+
+/* v7 — one causal narrative: loops engrave the coin; pupil reveals the homepage. */
+.intro-knots path { transition:none; }
+.intro.is-playing .intro-play-arc { opacity:0; translate:0 -8px; }
+.intro.is-transforming .intro-knots,
+.intro.is-opening .intro-knots { opacity:0; }
+.intro.is-transforming .intro-play-arc,
+.intro.is-opening .intro-play-arc { opacity:0; }
+.intro.is-opening .intro-skip { opacity:0; pointer-events:none; }
+.intro.is-opening .intro-shadow { opacity:0 !important; }
+/* No artificial eyelid or hard-cut blink; the pupil is the doorway. */
+/* Reserve the top of narrow screens for the invitation, above the first loops. */
+@media (max-width:700px) {
+  .intro-play-arc { top:0; }
 }
