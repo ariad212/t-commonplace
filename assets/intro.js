@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — v7: from mathematical loops to engraved coin to iris to page.
+/* THE COMMONPLACE — v8: 3D bronze coin, larger closed mathematical loops, restored hazel iris.
    No external animation library. One canvas draws BOTH the coin and the iris.
    The final pupil opens a real window onto the homepage underneath. */
 (() => {
@@ -8,14 +8,15 @@
   const object = document.getElementById('intro-object');
   const coin = document.getElementById('intro-coin');
   const shadow = document.getElementById('intro-shadow');
+  const sidewall = document.getElementById('coin-sidewall');
   const canvas = document.getElementById('coin-surface');
   const enter = document.getElementById('intro-enter');
   const skip = document.getElementById('intro-skip');
-  if (!object || !coin || !shadow || !canvas || !enter || !skip) return;
+  if (!object || !coin || !shadow || !sidewall || !canvas || !enter || !skip) return;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sessionKey = 'commonplace-intro-seen-v7';
+  const sessionKey = 'commonplace-intro-seen-v8';
   const clamp = (x, lo=0, hi=1) => Math.max(lo, Math.min(hi, x));
   const lerp = (a,b,t) => a+(b-a)*t;
   const ease = x => {x=clamp(x);return x*x*(3-2*x)};
@@ -24,8 +25,39 @@
   const rnd = n => ((Math.sin(n*128.63+41.7)*12479.29)%1+1)%1;
   const rgb = s => [1,3,5].map(i=>parseInt(s.substring(i,i+2),16));
   const col = (a,b,p) => { const A=rgb(a),B=rgb(b);return `rgb(${A.map((n,i)=>Math.round(lerp(n,B[i],p))).join(',')})`;};
-  const R = 304, C = 320, N=640;
-  const backs = coin.querySelectorAll('.coin-back, .coin-edge');
+  const R = 306, C = 320, N=640;
+  const back = coin.querySelector('.coin-back');
+  const rim = document.getElementById('coin-rim');
+  if (!back || !rim) return;
+
+  // Build an actual curved 3D sidewall from tangential facets. No 3D CDN,
+  // image subscription, or flat sticker rotating in 2D is required.
+  const FACETS = 96;
+  const facets=[];
+  for(let i=0;i<FACETS;i++){
+    const facet=document.createElement('span');
+    facet.className='coin-rim-facet';
+    rim.appendChild(facet);
+    facets.push(facet);
+  }
+  function measureRim(){
+    const diameter=coin.offsetWidth;
+    if(!diameter)return;
+    const radius=diameter*.505, thickness=Math.max(20,diameter*.09);
+    for(let i=0;i<FACETS;i++){
+      const a=i*2*Math.PI/FACETS;
+      const n=Math.max(0,Math.cos(a-.65));
+      const warmth=Math.round(75+58*n);
+      const light=Math.round(90+65*n);
+      const f=facets[i];
+      f.style.width=(2*Math.PI*radius/FACETS+1.9).toFixed(2)+'px';
+      f.style.height=thickness.toFixed(2)+'px';
+      f.style.transform=`translate(-50%,-50%) translate3d(${(radius*Math.cos(a)).toFixed(2)}px,${(radius*Math.sin(a)).toFixed(2)}px,0) rotateZ(${(a*180/Math.PI+90).toFixed(2)}deg) rotateX(90deg)`;
+      f.style.background=`repeating-linear-gradient(90deg, rgba(55,33,20,.2) 0 1px,transparent 1px 3.6px),linear-gradient(180deg,rgb(${Math.min(255,light+32)},${Math.min(255,warmth+35)},${Math.min(255,warmth+10)}) 0%,rgb(${light},${warmth},${Math.round(warmth*.72)}) 34%,rgb(${Math.round(light*.78)},${Math.round(warmth*.7)},${Math.round(warmth*.51)}) 75%,#5b3d30 100%)`;
+    }
+  }
+  measureRim();
+  window.addEventListener('resize',measureRim,{passive:true});
   let anim=0, started=false, ended=false, origin=0;
   let loopPaths = [];
 
@@ -59,12 +91,13 @@
     ctx.closePath();
   }
 
-  const fibres=Array.from({length:172},(_,i)=>({
-    angle:i*2*Math.PI/172,
-    bend:(rnd(i+17)-.5)*.14,
-    end:lerp(237,284,rnd(i+92)),
-    alpha:lerp(.23,.73,rnd(i+183)),
-    stroke:['#cbb394','#3b332f','#a98d69','#807369','#6d5745','#e0bd8c'][i%6]
+  // v6's richer fibres and dark charcoal limbal rim, with hazel, brown and grey.
+  const fibres=Array.from({length:300},(_,i)=>({
+    angle:i*2*Math.PI/300,
+    bend:(rnd(i+17)-.5)*.23,
+    end:lerp(222,291,rnd(i+92)),
+    alpha:lerp(.17,.72,rnd(i+183)),
+    stroke:['#d2aa7c','#4d4844','#968d83','#9e7754','#d2c3a9','#645348'][i%6]
   }));
 
   function fillCircle(fill){ctx.fillStyle=fill;ctx.beginPath();ctx.arc(C,C,R,0,2*Math.PI);ctx.fill();}
@@ -74,14 +107,30 @@
     ctx.save();ctx.beginPath();ctx.arc(C,C,R,0,2*Math.PI);ctx.clip();
 
     // The SAME disk continuously changes colour, texture, and relief.
-    const surface=ctx.createRadialGradient(230,190,0,C,C,425);
-    const bronze=['#e8c9a9','#d0a384','#ae785d','#563f36'];
-    const iris=['#9b8a76','#a17f60','#756c66','#37322f'];
+    const surface=ctx.createRadialGradient(213,161,0,C,C,435);
+    const bronze=['#f1d7b0','#d5a882','#aa7153','#51382e'];
+    const iris=['#8e7d6c','#ac8661','#867c73','#342f2b'];
     [.0,.31,.66,1].forEach((at,i)=>surface.addColorStop(at,col(bronze[i],iris[i],m)));
     fillCircle(surface);
 
-    // The metallic concentric rings soften into a fine, coloured limbal ring.
+    // Brushed bronze grain and subtly embossed metallic concentric scoring.
+    // They fade out of the SAME canvas rather than sitting underneath the iris.
     const metal=1-m;
+    if(metal>0){
+      ctx.globalAlpha=.16*metal;
+      for(let i=0;i<410;i++){
+        const rad=18+rnd(i+2000)*277;
+        ctx.strokeStyle=i%3===0?'#ffe1bd':'#503525';
+        ctx.lineWidth=.35+rnd(i+1000)*.65;
+        const begin=rnd(i+600)*Math.PI*2;
+        ctx.beginPath();ctx.arc(C,C,rad,begin,begin+(.09+rnd(i+59)*.95));ctx.stroke();
+      }
+      ctx.globalAlpha=.58*metal;
+      const halo=ctx.createRadialGradient(224,177,4,290,290,340);
+      halo.addColorStop(0,'#fff2d978');halo.addColorStop(.4,'#ffddb012');halo.addColorStop(1,'#351c1c00');
+      fillCircle(halo);
+    }
+    // The metallic concentric rings soften into the v6-style limbal ring.
     ctx.globalAlpha=metal;
     ctx.strokeStyle='#604334';ctx.lineWidth=11;
     ctx.beginPath();ctx.arc(C,C,284,0,2*Math.PI);ctx.stroke();
@@ -105,8 +154,8 @@
     if(m>0){
       for(let i=0;i<fibres.length;i++){
         const f=fibres[i],a=f.angle;
-        const inner=lerp(142,96,m)+(rnd(i+72)-.5)*9;
-        const tip=lerp(225,f.end,m);
+        const inner=lerp(150,87,m)+(rnd(i+72)-.5)*10;
+        const tip=lerp(218,f.end,m);
         const x1=C+inner*Math.cos(a),y1=C+inner*Math.sin(a);
         const x2=C+tip*Math.cos(a+f.bend),y2=C+tip*Math.sin(a+f.bend);
         const cx=C+lerp(inner,tip,.59)*Math.cos(a+f.bend*.48);
@@ -115,9 +164,12 @@
         ctx.strokeStyle=f.stroke;ctx.lineWidth=lerp(1.1,2.3,rnd(i+6));
         ctx.globalAlpha=m*f.alpha;ctx.stroke();
       }
-      ctx.globalAlpha=m*.8;
-      ctx.strokeStyle='#44382e';ctx.lineWidth=8;
-      ctx.beginPath();ctx.arc(C,C,274,0,2*Math.PI);ctx.stroke();
+      // Restore v6's unmistakable dark outside iris rim, like a real limbal ring.
+      ctx.globalAlpha=m*.88;
+      ctx.strokeStyle='#342f2b';ctx.lineWidth=18;
+      ctx.beginPath();ctx.arc(C,C,296,0,2*Math.PI);ctx.stroke();
+      ctx.strokeStyle='#8d8478';ctx.lineWidth=3;
+      ctx.beginPath();ctx.arc(C,C,279,0,2*Math.PI);ctx.stroke();
       ctx.globalAlpha=m;
       const innerTone=ctx.createRadialGradient(C,C,55,C,C,151);
       innerTone.addColorStop(0,'#1f1c1a');innerTone.addColorStop(.7,'#56463488');innerTone.addColorStop(1,'#58412e00');
@@ -132,14 +184,21 @@
       ctx.fillStyle='#f8e5cc';ctx.beginPath();ctx.ellipse(255,244,16,22,-.45,0,2*Math.PI);ctx.fill();
     }
     ctx.globalAlpha=1;
-    ctx.strokeStyle=col('#664837','#3b3631',m);ctx.lineWidth=lerp(7,2,m);
+    ctx.strokeStyle=col('#704934','#34302b',m);ctx.lineWidth=lerp(9,3,m);
     ctx.beginPath();ctx.arc(C,C,R-4,0,2*Math.PI);ctx.stroke();
     ctx.restore();
-    backs.forEach(el=>{el.style.opacity=(1-m).toFixed(3)});
+    back.style.opacity=(1-m).toFixed(3); rim.style.opacity=(1-m).toFixed(3); sidewall.style.opacity=(1-m).toFixed(3);
   }
 
   function move(x,y,pitch,roll,scale=1,yaw=0){
     object.style.transform=`translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) rotateZ(${roll.toFixed(2)}deg) rotateX(${pitch.toFixed(2)}deg) rotateY(${yaw.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
+    // Project the rim silhouette from the same coin angle. This fills the
+    // former visual gap at the edge of the coin without a detached ring.
+    const angle=pitch*Math.PI/180, diameter=coin.offsetWidth;
+    const thickness=Math.max(20,diameter*.09);
+    const silhouette=Math.abs(diameter*Math.cos(angle))+Math.abs(thickness*Math.sin(angle));
+    sidewall.style.height=silhouette.toFixed(1)+'px';
+    sidewall.style.transform=`translate(-50%,-50%) translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${roll.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
     shadow.style.transform=`translateX(${(x*.8).toFixed(1)}px) scale(${clamp(1-y/300,.6,1.2).toFixed(3)})`;
     shadow.style.opacity=scale>1.8?'0':String(clamp(.43+y/380,.15,.6));
   }
@@ -186,6 +245,7 @@
     window.setTimeout(()=>intro.remove(),550);
   }
   paint(0,.5);
+  sidewall.style.height=(coin.offsetWidth*Math.abs(Math.cos(72*Math.PI/180))+Math.max(20,coin.offsetWidth*.09)*Math.sin(72*Math.PI/180)).toFixed(1)+'px';
   // On reload, ?intro=1 provides an easy replay during design reviews.
   const replay = new URLSearchParams(window.location.search).has('intro');
   if(reduce){finish();return;}

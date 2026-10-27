@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — v7: closed loops, engraved coin, iris, and a pupil-window into the homepage. */
+/* THE COMMONPLACE — v8: 3D bronze coin, larger curated loops, v6 hazel iris, pupil reveal. */
 :root { --intro-paper:#f5f2eb; --intro-ink:#333930; --intro-clay:#ba6049; }
 .intro { display:none; position:fixed; z-index:3000; inset:0; background:var(--intro-paper); color:var(--intro-ink); overflow:hidden; flex-direction:column; isolation:isolate; transition:opacity .7s ease,visibility .7s; }
 .intro.is-ready { display:flex; }
@@ -7,15 +7,25 @@ body.intro-active { overflow:hidden; }
 .intro-canvas { flex:1; min-height:0; position:relative; cursor:pointer; }
 .intro-knots { position:absolute; width:100%; height:100%; inset:0; color:#43483c; opacity:.78; transition:opacity 1.8s ease; pointer-events:none; }
 .intro-center { position:absolute; inset:0; display:grid; place-items:center; perspective:1200px; pointer-events:none; }
-.intro-orbit { --coin-size:clamp(180px,27vw,330px); position:relative; width:var(--coin-size); height:var(--coin-size); display:grid; place-items:center; transform-style:preserve-3d; }
-.intro-object { position:relative; width:100%; height:100%; transform-style:preserve-3d; transform:rotateX(72deg); will-change:transform; }
+.intro-orbit { --coin-size:clamp(210px,27vw,350px); position:relative; width:var(--coin-size); height:var(--coin-size); display:grid; place-items:center; transform-style:preserve-3d; }
+.intro-object { z-index:1; position:relative; width:100%; height:100%; transform-style:preserve-3d; transform:rotateX(72deg); will-change:transform; }
 .intro-coin { position:relative; width:100%; height:100%; transform-style:preserve-3d; }
 .coin-back,.coin-front,.coin-edge { position:absolute; inset:0; border-radius:50%; backface-visibility:hidden; -webkit-backface-visibility:hidden; }
-.coin-front { transform:translateZ(8px); overflow:hidden; background:transparent; }
+.coin-front { transform:translateZ(19px); overflow:hidden; background:transparent; box-shadow:0 0 1px 1px #634532; }
 .coin-front canvas { display:block; width:100%; height:100%; border-radius:50%; }
-.coin-back { transform:rotateY(180deg) translateZ(8px); background:radial-gradient(circle at 30% 28%,#e1b99b 0,#bf8b70 40%,#80503e 100%); border:5px double #76503d; box-shadow:inset 0 0 0 10px #c59675,inset 0 0 0 13px #76503d; }
+.coin-back { transform:rotateY(180deg) translateZ(19px); background:radial-gradient(circle at 30% 28%,#e1b99b 0,#bf8b70 40%,#80503e 100%); border:5px double #76503d; box-shadow:inset 0 0 0 10px #c59675,inset 0 0 0 13px #76503d; }
 .coin-back::after { content:'✳'; position:absolute; inset:0; display:grid; place-items:center; color:#75503b; font:clamp(72px,10vw,140px)/1 Georgia,serif; text-shadow:0 1px #e6be9b; }
-.coin-edge { transform:translateZ(0); background:linear-gradient(100deg,#73503f 0%,#bd9276 23%,#8c604e 50%,#dbc09d 78%,#704b3e 100%); box-shadow:0 0 0 2px #5a4135,0 3px 0 1px #a77559,0 7px 0 1px #76513f,0 10px 12px #3e322932; }
+/* 96 individually shaded tangent facets form a genuine extruded 3D sidewall. */
+.coin-rim { position:absolute; inset:0; transform-style:preserve-3d; pointer-events:none; }
+/* Screen-projected solid sidewall: still visibly thick when the face turns edge-on. */
+.coin-sidewall { position:absolute; left:50%; top:50%; width:102%; height:42%; border-radius:50%; pointer-events:none;
+  background:repeating-linear-gradient(90deg,#24170f18 0 1px,transparent 1px 3px),
+  linear-gradient(180deg,#9b6044 0%,#eac6a1 15%,#be8a67 40%,#966145 56%,#5e3b2b 88%,#3a2821 100%);
+  box-shadow:0 1px 0 #eecfac,inset 0 3px 5px #f6dabf66,inset 0 -6px 9px #35251f80;
+  transform:translate(-50%,-50%); will-change:height,transform,opacity; }
+.coin-rim-facet { position:absolute; left:50%; top:50%; display:block; transform-style:preserve-3d; backface-visibility:visible; -webkit-backface-visibility:visible; border-top:1px solid #f0cda6; border-bottom:1px solid #614333; box-sizing:border-box; }
+/* Specular lighting stays physically attached to the coin face as it rotates. */
+.coin-front::after { content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(120deg,#fff9df39 0%,transparent 35%,#30201811 60%,transparent 75%); pointer-events:none; mix-blend-mode:soft-light; }
 .intro-shadow { position:absolute; z-index:-1; left:12%; bottom:-13%; width:76%; height:11%; border-radius:50%; background:#42352b4b; filter:blur(13px); transform:scale(.72); opacity:.35; will-change:transform,opacity; pointer-events:none; }
 /* Quiet controls: no text blocks over the loops. */
 .intro-enter { position:absolute; z-index:8; bottom:clamp(22px,4vw,48px); left:50%; transform:translateX(-50%); white-space:nowrap; border:0; border-bottom:1px solid currentColor; border-radius:0; padding:10px 3px 12px; color:var(--intro-ink); background:transparent; font:600 10px/1.5 'DM Sans',sans-serif; letter-spacing:.16em; cursor:pointer; transition:opacity .3s,border-color .3s; }
@@ -28,7 +38,7 @@ body.intro-active { overflow:hidden; }
 .intro.is-transforming .intro-knots { opacity:.12; }
 .intro.is-zooming .intro-knots { opacity:0; }
 .intro.is-zooming .intro-skip { opacity:0; pointer-events:none; }
-@media(max-width:700px){.intro-enter{bottom:25px;font-size:9px;letter-spacing:.1em}.intro-skip{top:22px;right:24px}.intro-knots{width:145%;left:-23%;}.intro-orbit{--coin-size:clamp(174px,49vw,260px)}}
+@media(max-width:700px){.intro-enter{bottom:25px;font-size:9px;letter-spacing:.1em}.intro-skip{top:22px;right:24px}.intro-knots{width:145%;left:-23%;}.intro-orbit{--coin-size:clamp(178px,49vw,275px)}}
 @media(prefers-reduced-motion:reduce){.intro,.intro *{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
 
 /* Curated loop positions and curved lettering retained from the previous layout. */
@@ -66,5 +76,13 @@ body.intro-active { overflow:hidden; }
 /* No artificial eyelid or hard-cut blink; the pupil is the doorway. */
 /* Reserve the top of narrow screens for the invitation, above the first loops. */
 @media (max-width:700px) {
+  .intro-play-arc { top:0; }
+}
+
+/* v8 — mathematically closed larger loops, spaced in independent drawing fields. */
+.intro-knots { color:#4a4c43; opacity:.85; }
+/* Preserve 3D context: CSS filters on the orbit would flatten the extrusion. */
+@media (max-width:700px) {
+  .intro-knots { opacity:.9; }
   .intro-play-arc { top:0; }
 }
