@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — v8: 3D bronze coin, larger closed mathematical loops, restored hazel iris.
+/* THE COMMONPLACE — v9: 3D bronze coin, larger closed mathematical loops, restored hazel iris.
    No external animation library. One canvas draws BOTH the coin and the iris.
    The final pupil opens a real window onto the homepage underneath. */
 (() => {
@@ -8,15 +8,14 @@
   const object = document.getElementById('intro-object');
   const coin = document.getElementById('intro-coin');
   const shadow = document.getElementById('intro-shadow');
-  const sidewall = document.getElementById('coin-sidewall');
   const canvas = document.getElementById('coin-surface');
   const enter = document.getElementById('intro-enter');
   const skip = document.getElementById('intro-skip');
-  if (!object || !coin || !shadow || !sidewall || !canvas || !enter || !skip) return;
+  if (!object || !coin || !shadow || !canvas || !enter || !skip) return;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sessionKey = 'commonplace-intro-seen-v8';
+  const sessionKey = 'commonplace-intro-seen-v9';
   const clamp = (x, lo=0, hi=1) => Math.max(lo, Math.min(hi, x));
   const lerp = (a,b,t) => a+(b-a)*t;
   const ease = x => {x=clamp(x);return x*x*(3-2*x)};
@@ -187,18 +186,11 @@
     ctx.strokeStyle=col('#704934','#34302b',m);ctx.lineWidth=lerp(9,3,m);
     ctx.beginPath();ctx.arc(C,C,R-4,0,2*Math.PI);ctx.stroke();
     ctx.restore();
-    back.style.opacity=(1-m).toFixed(3); rim.style.opacity=(1-m).toFixed(3); sidewall.style.opacity=(1-m).toFixed(3);
+    back.style.opacity=(1-m).toFixed(3); rim.style.opacity=(1-m).toFixed(3);
   }
 
   function move(x,y,pitch,roll,scale=1,yaw=0){
     object.style.transform=`translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) rotateZ(${roll.toFixed(2)}deg) rotateX(${pitch.toFixed(2)}deg) rotateY(${yaw.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
-    // Project the rim silhouette from the same coin angle. This fills the
-    // former visual gap at the edge of the coin without a detached ring.
-    const angle=pitch*Math.PI/180, diameter=coin.offsetWidth;
-    const thickness=Math.max(20,diameter*.09);
-    const silhouette=Math.abs(diameter*Math.cos(angle))+Math.abs(thickness*Math.sin(angle));
-    sidewall.style.height=silhouette.toFixed(1)+'px';
-    sidewall.style.transform=`translate(-50%,-50%) translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${roll.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
     shadow.style.transform=`translateX(${(x*.8).toFixed(1)}px) scale(${clamp(1-y/300,.6,1.2).toFixed(3)})`;
     shadow.style.opacity=scale>1.8?'0':String(clamp(.43+y/380,.15,.6));
   }
@@ -207,7 +199,7 @@
   // same gesture the matching engraving on the coin gains definition.
   function gather(u){
     const p=ease(u);
-    const desktop=window.innerWidth>700;
+    const desktop=window.innerWidth>700 || (window.innerHeight<=480 && window.innerWidth>window.innerHeight);
     loopPaths.forEach(({path,dx,dy,i})=>{
       const active=path.ownerSVGElement.classList.contains(desktop?'intro-knots--desktop':'intro-knots--mobile');
       if(!active)return;
@@ -216,6 +208,18 @@
       path.style.transform=`translate(${(dx*v).toFixed(2)}px,${(dy*v).toFixed(2)}px) scale(${(1-.93*v).toFixed(3)})`;
       path.style.opacity=(1-ease(clamp((v-.20)/.8))).toFixed(3);
     });
+  }
+
+  function flightBounds(){
+    const diameter=coin.offsetWidth;
+    // Reserve room for the extruded rim and any slight Z rotation.
+    const margin=18;
+    const horizontal=Math.max(0,window.innerWidth/2-diameter*.61-margin);
+    return {
+      left:-Math.min(53,horizontal), right:Math.min(41,horizontal),
+      lift:Math.min(142,Math.max(0,window.innerHeight/2-diameter*.61-margin)),
+      land:Math.min(34,Math.max(0,window.innerHeight/2-diameter*.61-margin))
+    };
   }
 
   const DUR={GATHER:1050,FLIP:2640,IMPACT:320,ROLL:900,SETTLE:630,MORPH:2100,REVEAL:1500};
@@ -245,7 +249,6 @@
     window.setTimeout(()=>intro.remove(),550);
   }
   paint(0,.5);
-  sidewall.style.height=(coin.offsetWidth*Math.abs(Math.cos(72*Math.PI/180))+Math.max(20,coin.offsetWidth*.09)*Math.sin(72*Math.PI/180)).toFixed(1)+'px';
   // On reload, ?intro=1 provides an easy replay during design reviews.
   const replay = new URLSearchParams(window.location.search).has('intro');
   if(reduce){finish();return;}
@@ -257,6 +260,7 @@
   function frame(now){
     if(ended)return;
     const t=now-origin;
+    const flight=flightBounds();
     if(t<timing.gatherEnd){
       const p=fraction(t,0,DUR.GATHER);
       gather(p);paint(0,lerp(.5,1,ease(p)));
@@ -264,21 +268,21 @@
     } else if(t<timing.flipEnd){
       const u=fraction(t,timing.gatherEnd,DUR.FLIP),p=inOut(u);
       // Three forward turns, landing in the face-on plane.
-      move(-53*ease(u),34*ease(u)-142*Math.sin(Math.PI*u),72+1008*p,-9*ease(u),1,Math.sin(u*6*Math.PI)*2);
+      move(flight.left*ease(u),flight.land*ease(u)-flight.lift*Math.sin(Math.PI*u),72+1008*p,-9*ease(u),1,Math.sin(u*6*Math.PI)*2);
     } else if(t<timing.impactEnd){
       const u=fraction(t,timing.flipEnd,DUR.IMPACT);
       // Fast impact, a brief rebound, and abrupt return to the surface.
       const rebound=17*Math.sin(Math.PI*u)*Math.exp(-1.7*u);
-      move(-53,34-rebound,1080,-9+2*Math.sin(u*3*Math.PI),1-.018*Math.sin(Math.PI*u));
+      move(flight.left,flight.land-rebound,1080,-9+2*Math.sin(u*3*Math.PI),1-.018*Math.sin(Math.PI*u));
     } else if(t<timing.rollEnd){
       const u=fraction(t,timing.impactEnd,DUR.ROLL),p=out(u);
       // Rim rolling: Z-rotation follows the change in horizontal position.
-      const dx=lerp(-53,41,p);
+      const dx=lerp(flight.left,flight.right,p);
       const roll=lerp(-9,44,p)+(1-u)*5*Math.sin(u*10*Math.PI);
-      move(dx,34-2*Math.sin(Math.PI*u),1080,roll);
+      move(dx,flight.land-2*Math.sin(Math.PI*u),1080,roll);
     } else if(t<timing.settleEnd){
       const u=fraction(t,timing.rollEnd,DUR.SETTLE),p=ease(u),w=(1-u)*Math.sin(u*5*Math.PI);
-      move(lerp(41,0,p),lerp(34,0,p)-2*w,1080+3*w,lerp(44,0,p)+5*w);
+      move(lerp(flight.right,0,p),lerp(flight.land,0,p)-2*w,1080+3*w,lerp(44,0,p)+5*w);
     } else if(t<timing.morphEnd){
       const u=fraction(t,timing.settleEnd,DUR.MORPH);
       intro.classList.add('is-transforming');

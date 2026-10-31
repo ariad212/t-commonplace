@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — v8: 3D bronze coin, larger curated loops, v6 hazel iris, pupil reveal. */
+/* THE COMMONPLACE — v9: 3D bronze coin, larger curated loops, v6 hazel iris, pupil reveal. */
 :root { --intro-paper:#f5f2eb; --intro-ink:#333930; --intro-clay:#ba6049; }
 .intro { display:none; position:fixed; z-index:3000; inset:0; background:var(--intro-paper); color:var(--intro-ink); overflow:hidden; flex-direction:column; isolation:isolate; transition:opacity .7s ease,visibility .7s; }
 .intro.is-ready { display:flex; }
@@ -7,7 +7,7 @@ body.intro-active { overflow:hidden; }
 .intro-canvas { flex:1; min-height:0; position:relative; cursor:pointer; }
 .intro-knots { position:absolute; width:100%; height:100%; inset:0; color:#43483c; opacity:.78; transition:opacity 1.8s ease; pointer-events:none; }
 .intro-center { position:absolute; inset:0; display:grid; place-items:center; perspective:1200px; pointer-events:none; }
-.intro-orbit { --coin-size:clamp(210px,27vw,350px); position:relative; width:var(--coin-size); height:var(--coin-size); display:grid; place-items:center; transform-style:preserve-3d; }
+.intro-orbit { --coin-size:min(clamp(210px,27vw,350px),45svh); position:relative; width:var(--coin-size); height:var(--coin-size); display:grid; place-items:center; transform-style:preserve-3d; }
 .intro-object { z-index:1; position:relative; width:100%; height:100%; transform-style:preserve-3d; transform:rotateX(72deg); will-change:transform; }
 .intro-coin { position:relative; width:100%; height:100%; transform-style:preserve-3d; }
 .coin-back,.coin-front,.coin-edge { position:absolute; inset:0; border-radius:50%; backface-visibility:hidden; -webkit-backface-visibility:hidden; }
@@ -17,12 +17,7 @@ body.intro-active { overflow:hidden; }
 .coin-back::after { content:'✳'; position:absolute; inset:0; display:grid; place-items:center; color:#75503b; font:clamp(72px,10vw,140px)/1 Georgia,serif; text-shadow:0 1px #e6be9b; }
 /* 96 individually shaded tangent facets form a genuine extruded 3D sidewall. */
 .coin-rim { position:absolute; inset:0; transform-style:preserve-3d; pointer-events:none; }
-/* Screen-projected solid sidewall: still visibly thick when the face turns edge-on. */
-.coin-sidewall { position:absolute; left:50%; top:50%; width:102%; height:42%; border-radius:50%; pointer-events:none;
-  background:repeating-linear-gradient(90deg,#24170f18 0 1px,transparent 1px 3px),
-  linear-gradient(180deg,#9b6044 0%,#eac6a1 15%,#be8a67 40%,#966145 56%,#5e3b2b 88%,#3a2821 100%);
-  box-shadow:0 1px 0 #eecfac,inset 0 3px 5px #f6dabf66,inset 0 -6px 9px #35251f80;
-  transform:translate(-50%,-50%); will-change:height,transform,opacity; }
+/* The 3D tangent facets alone create the milled edge; no overlaid fake sidewall. */
 .coin-rim-facet { position:absolute; left:50%; top:50%; display:block; transform-style:preserve-3d; backface-visibility:visible; -webkit-backface-visibility:visible; border-top:1px solid #f0cda6; border-bottom:1px solid #614333; box-sizing:border-box; }
 /* Specular lighting stays physically attached to the coin face as it rotates. */
 .coin-front::after { content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(120deg,#fff9df39 0%,transparent 35%,#30201811 60%,transparent 75%); pointer-events:none; mix-blend-mode:soft-light; }
@@ -38,7 +33,7 @@ body.intro-active { overflow:hidden; }
 .intro.is-transforming .intro-knots { opacity:.12; }
 .intro.is-zooming .intro-knots { opacity:0; }
 .intro.is-zooming .intro-skip { opacity:0; pointer-events:none; }
-@media(max-width:700px){.intro-enter{bottom:25px;font-size:9px;letter-spacing:.1em}.intro-skip{top:22px;right:24px}.intro-knots{width:145%;left:-23%;}.intro-orbit{--coin-size:clamp(178px,49vw,275px)}}
+@media(max-width:700px){.intro-enter{bottom:25px;font-size:9px;letter-spacing:.1em}.intro-skip{top:22px;right:24px}.intro-knots{width:145%;left:-23%;}.intro-orbit{--coin-size:min(clamp(178px,49vw,275px),45svh)}}
 @media(prefers-reduced-motion:reduce){.intro,.intro *{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
 
 /* Curated loop positions and curved lettering retained from the previous layout. */
@@ -85,4 +80,25 @@ body.intro-active { overflow:hidden; }
 @media (max-width:700px) {
   .intro-knots { opacity:.9; }
   .intro-play-arc { top:0; }
+}
+
+/* v9 — allow the coin to shrink in short viewports without clipping. */
+@media (max-height:480px) { .intro-play-arc { width:min(480px,54vw); top:0; } .intro-enter { bottom:10px; } }
+
+/* v9: intentional landscape arrangement instead of a crushed portrait pattern. */
+@media (max-height:480px) and (orientation:landscape) {
+  .intro-knots--desktop { display:block; }
+  .intro-knots--mobile { display:none; }
+  .intro-play-arc { width:min(480px,54vw); top:0; }
+}
+@media (min-width:701px) and (max-width:1150px) {
+  .intro-play-arc { width:min(620px,56vw); }
+}
+/* Short landscape screens: keep the outer scribbles, protect heading and controls. */
+@media (max-height:480px) and (orientation:landscape) {
+  .intro-knots--desktop path:nth-child(2),
+  .intro-knots--desktop path:nth-child(3),
+  .intro-knots--desktop path:nth-child(4),
+  .intro-knots--desktop path:nth-child(15),
+  .intro-knots--desktop path:nth-child(16) { display:none; }
 }
