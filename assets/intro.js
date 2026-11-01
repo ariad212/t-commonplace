@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — v10: solid coin thickness restored, v9 loops and iris kept.
+/* THE COMMONPLACE — v11: unique knotwork, lightning emblem, continuous morph rim.
    No external animation library. One canvas draws BOTH the coin and the iris.
    The final pupil opens a real window onto the homepage underneath. */
 (() => {
@@ -15,7 +15,7 @@
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sessionKey = 'commonplace-intro-seen-v10';
+  const sessionKey = 'commonplace-intro-seen-v11';
   const clamp = (x, lo=0, hi=1) => Math.max(lo, Math.min(hi, x));
   const lerp = (a,b,t) => a+(b-a)*t;
   const ease = x => {x=clamp(x);return x*x*(3-2*x)};
@@ -81,16 +81,12 @@
     });
   }
 
-  // This rose-curve equation is echoed by the closed curves in the opening.
-  // Its engraving becomes the structure from which the iris fibres emerge.
-  function engravingPath(scale=1) {
+  // A single outline of a lightning bolt, embossed into the metallic face.
+  // Unlike the old rose-curve emblem, it is not repeated in the knot drawings.
+  function lightningPath(){
     ctx.beginPath();
-    for(let j=0;j<=300;j++) {
-      const a=(j/300)*Math.PI*2;
-      const r=150*scale*(.70+.30*Math.cos(4*a));
-      const x=C+r*Math.cos(a),y=C+r*Math.sin(a);
-      if(j===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
-    }
+    ctx.moveTo(357,198);ctx.lineTo(271,339);ctx.lineTo(328,328);
+    ctx.lineTo(286,443);ctx.lineTo(389,300);ctx.lineTo(328,310);
     ctx.closePath();
   }
 
@@ -142,15 +138,14 @@
     ctx.strokeStyle='#674d40';ctx.lineWidth=2;
     ctx.beginPath();ctx.arc(C,C,263,0,2*Math.PI);ctx.stroke();
 
-    // Identical closed rosette engravings, echoed by the outer knot drawings.
-    // The lines fade while the fibres assume their direction and spacing.
-    ctx.globalAlpha=metal*engrave;
-    ctx.strokeStyle='#785440';ctx.lineWidth=5.5;
-    engravingPath(1);ctx.stroke();
-    ctx.strokeStyle='#e5b88f';ctx.lineWidth=1.9;
-    engravingPath(.92);ctx.stroke();
-    ctx.strokeStyle='#79523f';ctx.lineWidth=3.1;
-    engravingPath(.52);ctx.stroke();
+    // Metallic lightning outline gradually dissolves into the SAME iris surface.
+    // No separate overlay, no yellow fill, and no repeating four-point motif.
+    ctx.globalAlpha=metal*engrave*.85;
+    ctx.strokeStyle='#714b36';ctx.lineWidth=15;
+    ctx.lineJoin='round';ctx.lineCap='round';lightningPath();ctx.stroke();
+    ctx.globalAlpha=metal*engrave*.9;
+    ctx.strokeStyle='#e9bf98';ctx.lineWidth=5.3;
+    lightningPath();ctx.stroke();
 
     // An iris never appears as a separate image/layer or a second DOM disk.
     // Its radial fibres are painted into this same changing coin surface.
@@ -167,10 +162,8 @@
         ctx.strokeStyle=f.stroke;ctx.lineWidth=lerp(1.1,2.3,rnd(i+6));
         ctx.globalAlpha=m*f.alpha;ctx.stroke();
       }
-      // Restore v6's unmistakable dark outside iris rim, like a real limbal ring.
-      ctx.globalAlpha=m*.88;
-      ctx.strokeStyle='#342f2b';ctx.lineWidth=18;
-      ctx.beginPath();ctx.arc(C,C,296,0,2*Math.PI);ctx.stroke();
+      // The v6-style inner iris boundary grows as the surface changes.
+      ctx.globalAlpha=m*.90;
       ctx.strokeStyle='#8d8478';ctx.lineWidth=3;
       ctx.beginPath();ctx.arc(C,C,279,0,2*Math.PI);ctx.stroke();
       ctx.globalAlpha=m;
@@ -186,11 +179,21 @@
       ctx.globalAlpha=m*.27;
       ctx.fillStyle='#f8e5cc';ctx.beginPath();ctx.ellipse(255,244,16,22,-.45,0,2*Math.PI);ctx.fill();
     }
+    // ONE uninterrupted outer boundary persists throughout the landing,
+    // metallic-to-organic morph and final iris state. The bronze ridged 3D
+    // edge hands off only once the dark iris limbal ring is established.
     ctx.globalAlpha=1;
+    ctx.strokeStyle=col('#704934','#342f2b',m);ctx.lineWidth=lerp(16,18,m);
+    ctx.beginPath();ctx.arc(C,C,296,0,2*Math.PI);ctx.stroke();
+    ctx.strokeStyle=col('#e5bf98','#82796e',m);ctx.lineWidth=lerp(3.3,2.4,m);
+    ctx.beginPath();ctx.arc(C,C,284,0,2*Math.PI);ctx.stroke();
     ctx.strokeStyle=col('#704934','#34302b',m);ctx.lineWidth=lerp(9,3,m);
     ctx.beginPath();ctx.arc(C,C,R-4,0,2*Math.PI);ctx.stroke();
     ctx.restore();
-    back.style.opacity=(1-m).toFixed(3); rim.style.opacity=(1-m).toFixed(3);
+    back.style.opacity=(1-m).toFixed(3);
+    // The solid metal sidewall lingers into the early morph, then yields
+    // smoothly to the fully visible iris border already painted above.
+    rim.style.opacity=(1-ease(clamp((m-.30)/.65))).toFixed(3);
   }
 
   function move(x,y,pitch,roll,scale=1,yaw=0){

@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — v10: visible, attached 3D edge throughout the forward flip. */
+/* THE COMMONPLACE — v11: attached 3D edge, embossed lightning, continuous border. */
 :root { --intro-paper:#f5f2eb; --intro-ink:#333930; --intro-clay:#ba6049; }
 .intro { display:none; position:fixed; z-index:3000; inset:0; background:var(--intro-paper); color:var(--intro-ink); overflow:hidden; flex-direction:column; isolation:isolate; transition:opacity .7s ease,visibility .7s; }
 .intro.is-ready { display:flex; }
@@ -14,7 +14,9 @@ body.intro-active { overflow:hidden; }
 .coin-front { transform:translateZ(var(--coin-half-depth)); overflow:hidden; background:transparent; box-shadow:0 0 1px 1px #634532; }
 .coin-front canvas { display:block; width:100%; height:100%; border-radius:50%; }
 .coin-back { transform:rotateY(180deg) translateZ(var(--coin-half-depth)); background:radial-gradient(circle at 30% 28%,#e1b99b 0,#bf8b70 40%,#80503e 100%); border:5px double #76503d; box-shadow:inset 0 0 0 10px #c59675,inset 0 0 0 13px #76503d; }
-.coin-back::after { content:'✳'; position:absolute; inset:0; display:grid; place-items:center; color:#75503b; font:clamp(72px,10vw,140px)/1 Georgia,serif; text-shadow:0 1px #e6be9b; }
+/* Matching outline on the reverse face; no star or filled bolt graphic. */
+.coin-bolt-back { position:absolute;inset:0;width:100%;height:100%;overflow:visible; }
+.coin-bolt-back path { fill:none;stroke:#74513f;stroke-width:16;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(1px 2px 0 #e6be9b); }
 /* 96 individually shaded tangent facets form a genuine extruded 3D sidewall. */
 .coin-rim { position:absolute; inset:0; transform-style:preserve-3d; pointer-events:none; }
 /* Physically attached tangent facets span precisely between the two coin faces. */
