@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — v9: 3D bronze coin, larger closed mathematical loops, restored hazel iris.
+/* THE COMMONPLACE — v10: solid coin thickness restored, v9 loops and iris kept.
    No external animation library. One canvas draws BOTH the coin and the iris.
    The final pupil opens a real window onto the homepage underneath. */
 (() => {
@@ -15,7 +15,7 @@
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sessionKey = 'commonplace-intro-seen-v9';
+  const sessionKey = 'commonplace-intro-seen-v10';
   const clamp = (x, lo=0, hi=1) => Math.max(lo, Math.min(hi, x));
   const lerp = (a,b,t) => a+(b-a)*t;
   const ease = x => {x=clamp(x);return x*x*(3-2*x)};
@@ -42,21 +42,25 @@
   function measureRim(){
     const diameter=coin.offsetWidth;
     if(!diameter)return;
-    const radius=diameter*.505, thickness=Math.max(20,diameter*.09);
+    // The intro starts display:none. Measure only AFTER it is shown.
+    // A single depth drives both front/back faces AND the cylindrical wall,
+    // preventing the edge from disconnecting as the coin tips towards us.
+    const radius=diameter*.505;
+    const thickness=Math.max(31,diameter*.16);
+    coin.style.setProperty('--coin-half-depth',(thickness/2).toFixed(2)+'px');
     for(let i=0;i<FACETS;i++){
       const a=i*2*Math.PI/FACETS;
       const n=Math.max(0,Math.cos(a-.65));
       const warmth=Math.round(75+58*n);
       const light=Math.round(90+65*n);
       const f=facets[i];
-      f.style.width=(2*Math.PI*radius/FACETS+1.9).toFixed(2)+'px';
+      f.style.width=(2*Math.PI*radius/FACETS+1.4).toFixed(2)+'px';
       f.style.height=thickness.toFixed(2)+'px';
       f.style.transform=`translate(-50%,-50%) translate3d(${(radius*Math.cos(a)).toFixed(2)}px,${(radius*Math.sin(a)).toFixed(2)}px,0) rotateZ(${(a*180/Math.PI+90).toFixed(2)}deg) rotateX(90deg)`;
       f.style.background=`repeating-linear-gradient(90deg, rgba(55,33,20,.2) 0 1px,transparent 1px 3.6px),linear-gradient(180deg,rgb(${Math.min(255,light+32)},${Math.min(255,warmth+35)},${Math.min(255,warmth+10)}) 0%,rgb(${light},${warmth},${Math.round(warmth*.72)}) 34%,rgb(${Math.round(light*.78)},${Math.round(warmth*.7)},${Math.round(warmth*.51)}) 75%,#5b3d30 100%)`;
     }
   }
-  measureRim();
-  window.addEventListener('resize',measureRim,{passive:true});
+  window.addEventListener('resize',()=>window.requestAnimationFrame(measureRim),{passive:true});
   let anim=0, started=false, ended=false, origin=0;
   let loopPaths = [];
 
@@ -255,6 +259,7 @@
   try{if(!replay&&sessionStorage.getItem(sessionKey)==='yes'){finish();return;}}catch(e){}
   intro.classList.add('is-ready');
   document.body.classList.add('intro-active');
+  measureRim(); // CSS size is available only after intro becomes visible.
   setupLoops();
 
   function frame(now){

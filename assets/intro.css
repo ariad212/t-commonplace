@@ -1,4 +1,4 @@
-/* THE COMMONPLACE — v9: 3D bronze coin, larger curated loops, v6 hazel iris, pupil reveal. */
+/* THE COMMONPLACE — v10: visible, attached 3D edge throughout the forward flip. */
 :root { --intro-paper:#f5f2eb; --intro-ink:#333930; --intro-clay:#ba6049; }
 .intro { display:none; position:fixed; z-index:3000; inset:0; background:var(--intro-paper); color:var(--intro-ink); overflow:hidden; flex-direction:column; isolation:isolate; transition:opacity .7s ease,visibility .7s; }
 .intro.is-ready { display:flex; }
@@ -9,15 +9,15 @@ body.intro-active { overflow:hidden; }
 .intro-center { position:absolute; inset:0; display:grid; place-items:center; perspective:1200px; pointer-events:none; }
 .intro-orbit { --coin-size:min(clamp(210px,27vw,350px),45svh); position:relative; width:var(--coin-size); height:var(--coin-size); display:grid; place-items:center; transform-style:preserve-3d; }
 .intro-object { z-index:1; position:relative; width:100%; height:100%; transform-style:preserve-3d; transform:rotateX(72deg); will-change:transform; }
-.intro-coin { position:relative; width:100%; height:100%; transform-style:preserve-3d; }
+.intro-coin { --coin-half-depth:24px; position:relative; width:100%; height:100%; transform-style:preserve-3d; }
 .coin-back,.coin-front,.coin-edge { position:absolute; inset:0; border-radius:50%; backface-visibility:hidden; -webkit-backface-visibility:hidden; }
-.coin-front { transform:translateZ(19px); overflow:hidden; background:transparent; box-shadow:0 0 1px 1px #634532; }
+.coin-front { transform:translateZ(var(--coin-half-depth)); overflow:hidden; background:transparent; box-shadow:0 0 1px 1px #634532; }
 .coin-front canvas { display:block; width:100%; height:100%; border-radius:50%; }
-.coin-back { transform:rotateY(180deg) translateZ(19px); background:radial-gradient(circle at 30% 28%,#e1b99b 0,#bf8b70 40%,#80503e 100%); border:5px double #76503d; box-shadow:inset 0 0 0 10px #c59675,inset 0 0 0 13px #76503d; }
+.coin-back { transform:rotateY(180deg) translateZ(var(--coin-half-depth)); background:radial-gradient(circle at 30% 28%,#e1b99b 0,#bf8b70 40%,#80503e 100%); border:5px double #76503d; box-shadow:inset 0 0 0 10px #c59675,inset 0 0 0 13px #76503d; }
 .coin-back::after { content:'✳'; position:absolute; inset:0; display:grid; place-items:center; color:#75503b; font:clamp(72px,10vw,140px)/1 Georgia,serif; text-shadow:0 1px #e6be9b; }
 /* 96 individually shaded tangent facets form a genuine extruded 3D sidewall. */
 .coin-rim { position:absolute; inset:0; transform-style:preserve-3d; pointer-events:none; }
-/* The 3D tangent facets alone create the milled edge; no overlaid fake sidewall. */
+/* Physically attached tangent facets span precisely between the two coin faces. */
 .coin-rim-facet { position:absolute; left:50%; top:50%; display:block; transform-style:preserve-3d; backface-visibility:visible; -webkit-backface-visibility:visible; border-top:1px solid #f0cda6; border-bottom:1px solid #614333; box-sizing:border-box; }
 /* Specular lighting stays physically attached to the coin face as it rotates. */
 .coin-front::after { content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(120deg,#fff9df39 0%,transparent 35%,#30201811 60%,transparent 75%); pointer-events:none; mix-blend-mode:soft-light; }
@@ -102,3 +102,6 @@ body.intro-active { overflow:hidden; }
   .intro-knots--desktop path:nth-child(15),
   .intro-knots--desktop path:nth-child(16) { display:none; }
 }
+
+/* v10: keep all child layers in the same 3D coordinate space; no fake sidewall. */
+.coin-rim-facet { will-change: auto; }
